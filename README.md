@@ -3,7 +3,7 @@
 ## 📦 Aplicação Wordpress na AWS 📦
 
 ## 📜 0 - Breve resumo >
-Para o terceiro projeto, nos foi instruído a executar, seguindo a topologia proposta _(imagem abaixo)_ uma aplicação Wordpress na AWS utilizando:  
+Para o terceiro projeto, nos foi instruído a executar, seguindo a topologia proposta _(imagens abaixo)_ uma aplicação Wordpress na AWS utilizando:  
 
         - 🌐 VPC (2 AZ's, cada uma com uma rede pública e uma privada);  
         - 📨 RDS;  
@@ -12,6 +12,7 @@ Para o terceiro projeto, nos foi instruído a executar, seguindo a topologia pro
         - 🤖 Auto Scaling;  
         
 ![Print zero](/Prints/0.0.png)
+![Print zero dois](/Prints/0.1.png)
 
 ---
 ## 🐧 1 - Ambiente Linux e Discord >
