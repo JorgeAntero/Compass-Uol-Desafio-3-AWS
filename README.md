@@ -15,9 +15,11 @@ Para o terceiro projeto, nos foi instruído a executar, seguindo a topologia pro
 ![Print zero dois](/Prints/0.1.png)
 
 ---
-## 🐧 1 - Ambiente Linux e Discord >
-        Utilizei em meu projeto uma Máquina Virtual, por meio do aplicativo Oracle VirtualBox. Criei a máquina com os requisitos mínimos para a utilização do Debian Headless, distro que possuo maior familiaridade. Além disso, habilitei a placa de rede em modo Bridge, para evitar possíveis erros de conexão.
-![Primeiro print](/Prints/1.1.png)
+## 🌐 1 - Criação da VPC >
+O começo de tudo foi estabelecer nossa VPC:  
+
+![Primeiro print](/Prints/1.1.png)  
+>LADFQAF
 
        Depois disso, criei um servidor no Discord e fiz um Webhook personalizado no chat principal.
 ![Segundo print](/Prints/1.1%20-%202.png)
