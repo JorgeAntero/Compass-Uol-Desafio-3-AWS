@@ -4,11 +4,11 @@
 
 ## 📜 0 - Breve resumo >
 Para o terceiro projeto, nos foi instruído a executar, seguindo a topologia proposta _(imagem abaixo)_ uma aplicação Wordpress na AWS utilizando:
-        - 🌐 VPC (2 AZ's, cada uma com uma rede pública e uma privada);
-        - 📨 RDS
-        - 🗃️ EFS
-        - 👥 ALB
-        - 🤖 Auto Scaling  
+        - 🌐 VPC (2 AZ's, cada uma com uma rede pública e uma privada);  
+        - 📨 RDS;  
+        - 🗃️ EFS;  
+        - 👥 ALB;  
+        - 🤖 Auto Scaling;  
         
 ![Print zero](/Prints/0.0.png)
 
