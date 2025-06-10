@@ -19,13 +19,25 @@ Para o terceiro projeto, nos foi instruído a executar, seguindo a topologia pro
 O começo de tudo foi estabelecer nossa VPC:  
 
 ![Primeiro print](/Prints/1.1.png)  
->LADFQAF
+>- Criei manualmente, para melhor aprendizado e evitar erros simples;  
+>- No CIDR IPv4, coloquei o range de `/16`;
+>- De resto, mantive a configuração padrão;  
 
-       Depois disso, criei um servidor no Discord e fiz um Webhook personalizado no chat principal.
-![Segundo print](/Prints/1.1%20-%202.png)
+E então criei e configurei as sub-redes da minha VPC:  
 
-        Então, já dentro da VM, fiz a instalação dos pacotes que eu precisaria para a realização do projeto:
->`apt-get install nginx` - Para conseguir levantar o servidor da página web;  
->`apt-get install samba` - Para conseguir compartilhar arquivos da minha máquina windows com a VM;  
->`apt-get install curl` - Para verificar a conectividade da URL;
+![Segundo print](/Prints/1.2.png)  
+![Terceiro print](/Prints/1.3.png) 
+
+>- Apliquei o range de CIDR IPv4 `/24` para todas as sub-redes;  
+>- As duas acima estão na primeira AZ;  
+
+![Quarto print](/Prints/1.4.png)  
+![Quinto print](/Prints/1.5.png)  
+
+>- Essas são da segunda AZ;  
+
+
+
+
+
 ---
