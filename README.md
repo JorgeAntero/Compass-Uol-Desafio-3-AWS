@@ -236,7 +236,7 @@ Para o terceiro projeto, fomos instruídos a executar, seguindo a topologia prop
 >- Porém, ao analisar o grupo de auto scaling, percebi o problema acima;  
 
 ---
-## 💊 8 - Ajuste final >  
+## 💊 9 - Ajuste final >  
 ### Então, para corrigir o último erro:
 
 ![Print Quarenta e sete](/Prints/8.1.png)  
