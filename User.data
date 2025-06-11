@@ -1,0 +1,47 @@
+#!/bin/bash
+
+
+exec > /var/log/user-data.log 2>&1                            #Toda saída vai para o arquivo de log;
+set -euxo pipefail                                            #Serve para evitar erros durante a execução do script;
+
+dnf update -y
+dnf install -y docker
+systemctl enable --now docker
+usermod -aG docker ec2-user
+
+mkdir -p /usr/libexec/docker/cli-plugins
+curl -SL "https://github.com/docker/compose/releases/download/v2.23.0/docker-compose-linux-x86_64" -o /usr/libexec/docker/cli-plugins/docker-compose
+chmod +x /usr/libexec/docker/cli-plugins/docker-compose  
+
+#As linhas acima baixam o docker e o docker compose, além de atualizar o sistema
+
+mkdir -p /mnt/efs                                            #Cria um diretório de montagem para o EFS;
+sudo mount -t nfs4 -o nfsvers=4.1 *MEU ID DA EFS*:/ /mnt/efs #Monta o EFS no diretório;
+
+while ! mountpoint -q /mnt/efs; do
+  sleep 2
+done                                                         #Esse While garante que o EFS seja montado antes de continuar;
+
+mkdir -p /mnt/efs/wordpress                                  #Cria o diretório para o Wordpress;
+chown -R ec2-user:ec2-user /mnt/efs                          #Dá permição ao ec2-user para usar os arquivos EFS;
+
+#A partir daqui, o comando cria o compose;
+sudo -u ec2-user bash -c 'cat > /home/ec2-user/docker-compose.yaml <<EOF
+version: "3.8"
+services:
+  wordpress:
+    image: wordpress
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      WORDPRESS_DB_HOST:*MEU ENDPOINT*
+      WORDPRESS_DB_USER: admin
+      WORDPRESS_DB_PASSWORD: *MINHA SENHA*
+      WORDPRESS_DB_NAME: Projeto
+    volumes:
+      - /mnt/efs/wordpress:/var/www/html
+EOF'
+
+#Abaixo, apenas executa o compose;
+sudo -u ec2-user bash -c "cd /home/ec2-user && docker compose up -d"
