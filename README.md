@@ -21,7 +21,8 @@ Para o terceiro projeto, fomos instruídos a executar, seguindo a topologia prop
 ![Primeiro print](/Prints/1.1.png)  
 >- Criei manualmente, para um melhor aprendizado e evitar erros simples;  
 >- No CIDR IPv4, coloquei o range de `/16`;
->- De resto, mantive a configuração padrão;  
+>- De resto, mantive a configuração padrão;
+>- **OBS: Não tirei print, mas precisei ativar nomes de host DNS na VPC também!**  
 
 ### E então criei e configurei as sub-redes da minha VPC:  
 
