@@ -188,8 +188,8 @@ Para o terceiro projeto, nos foi instruído a executar, seguindo a topologia pro
 #!/bin/bash
 
 
-exec > /var/log/user-data.log 2>&1        #Toda saída vai para o arquivo de log;
-set -euxo pipefail                        #Serve para evitar erros durante a execução do script;
+exec > /var/log/user-data.log 2>&1                            #Toda saída vai para o arquivo de log;
+set -euxo pipefail                                            #Serve para evitar erros durante a execução do script;
 
 dnf update -y
 dnf install -y docker
@@ -200,16 +200,19 @@ mkdir -p /usr/libexec/docker/cli-plugins
 curl -SL "https://github.com/docker/compose/releases/download/v2.23.0/docker-compose-linux-x86_64" -o /usr/libexec/docker/cli-plugins/docker-compose
 chmod +x /usr/libexec/docker/cli-plugins/docker-compose  
 
-mkdir -p /mnt/efs
-sudo mount -t nfs4 -o nfsvers=4.1 fs-0195aea43f8ae6ee8.efs.us-east-1.amazonaws.com:/ /mnt/efs
+#As linhas acima baixam o docker e o docker compose, além de atualizar o sistema
+
+mkdir -p /mnt/efs                                            #Cria um diretório de montagem para o EFS;
+sudo mount -t nfs4 -o nfsvers=4.1 *MEU ID DA EFS*:/ /mnt/efs #Monta o EFS no diretório;
 
 while ! mountpoint -q /mnt/efs; do
   sleep 2
-done
+done                                                         #Esse While garante que o EFS seja montado antes de continuar;
 
-mkdir -p /mnt/efs/wordpress
-chown -R ec2-user:ec2-user /mnt/efs
+mkdir -p /mnt/efs/wordpress                                  #Cria o diretório para o Wordpress;
+chown -R ec2-user:ec2-user /mnt/efs                          #Dá permição ao ec2-user para usar os arquivos EFS;
 
+#A partir daqui, o comando cria o compose;
 sudo -u ec2-user bash -c 'cat > /home/ec2-user/docker-compose.yaml <<EOF
 version: "3.8"
 services:
@@ -219,15 +222,16 @@ services:
     ports:
       - "80:80"
     environment:
-      WORDPRESS_DB_HOST: projeto-wordpress-banco.ck9k4ccc4dtm.us-east-1.rds.amazonaws.com
+      WORDPRESS_DB_HOST:*MEU ENDPOINT*
       WORDPRESS_DB_USER: admin
-      WORDPRESS_DB_PASSWORD: 02061521Jorge-
+      WORDPRESS_DB_PASSWORD: *MINHA SENHA*
       WORDPRESS_DB_NAME: Projeto
     volumes:
       - /mnt/efs/wordpress:/var/www/html
 EOF'
 
-sudo -u ec2-user bash -c "cd /home/ec2-user && docker compose up -d" 
+#Abaixo, apenas executa o compose;
+sudo -u ec2-user bash -c "cd /home/ec2-user && docker compose up -d"
 ```
 
 
