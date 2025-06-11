@@ -3,7 +3,7 @@
 ## 📦 Aplicação Wordpress na AWS 📦
 
 ## 📜 0 - Breve resumo >
-Para o terceiro projeto, nos foi instruído a executar, seguindo a topologia proposta _(imagens abaixo)_, uma aplicação Wordpress na AWS utilizando:  
+Para o terceiro projeto, fomos instruídos a executar, seguindo a topologia proposta _(imagens abaixo)_, uma aplicação WordPress na AWS utilizando:  
 
         - 🌐 VPC (2 AZ's, cada uma com uma rede pública e uma privada);  
         - 📨 RDS;  
@@ -19,7 +19,7 @@ Para o terceiro projeto, nos foi instruído a executar, seguindo a topologia pro
 ### O começo de tudo foi estabelecer nossa VPC:  
 
 ![Primeiro print](/Prints/1.1.png)  
->- Criei manualmente, para melhor aprendizado e evitar erros simples;  
+>- Criei manualmente, para um melhor aprendizado e evitar erros simples;  
 >- No CIDR IPv4, coloquei o range de `/16`;
 >- De resto, mantive a configuração padrão;  
 
@@ -129,7 +129,7 @@ Para o terceiro projeto, nos foi instruído a executar, seguindo a topologia pro
 
 >- Neguei o acesso público, e selecionei o SG que criei mais cedo;  
 >- Deixei sem preferência de AZ;  
->- A partir dessa etapa até a condifuração adicional, mantive tudo padrão;  
+>- A partir dessa etapa até a configuração adicional, mantive tudo padrão;  
 
 ![Print Vinte e oito](/Prints/3.7.png)  
 
@@ -159,7 +159,7 @@ Para o terceiro projeto, nos foi instruído a executar, seguindo a topologia pro
 
 ![Print Trinta e dois](/Prints/5.2.png)  
 
->- No mapeamento de rede, associei minha VPC e minhas sub-redes privadas das duas AZ'S;  
+>- No mapeamento de rede, associei minha VPC e minhas sub-redes públicas das duas AZ'S;  
 
 ![Print Trinta e três](/Prints/5.3.png)  
 
@@ -186,64 +186,13 @@ Para o terceiro projeto, nos foi instruído a executar, seguindo a topologia pro
 >- Não associei também sub-redes no modelo, e escolhi o grupo de segurança da EC2;  
 >- **OBS: Na imagem não aparece, mas também associei o grupo de segurança do RDS para evitar erros**   
 
-### Também adicionei no modelo meu user data (Para uma melhor visualização, [clique aqui!](https://github.com/JorgeAntero/Compass-Uol-Desafio-3-AWS/blob/main/User.data)):
-
-```
-#!/bin/bash
-
-
-exec > /var/log/user-data.log 2>&1                            #Toda saída vai para o arquivo de log;
-set -euxo pipefail                                            #Serve para evitar erros durante a execução do script;
-
-dnf update -y
-dnf install -y docker
-systemctl enable --now docker
-usermod -aG docker ec2-user
-
-mkdir -p /usr/libexec/docker/cli-plugins
-curl -SL "https://github.com/docker/compose/releases/download/v2.23.0/docker-compose-linux-x86_64" -o /usr/libexec/docker/cli-plugins/docker-compose
-chmod +x /usr/libexec/docker/cli-plugins/docker-compose  
-
-#As linhas acima baixam o docker e o docker compose, além de atualizar o sistema
-
-mkdir -p /mnt/efs                                            #Cria um diretório de montagem para o EFS;
-sudo mount -t nfs4 -o nfsvers=4.1 *MEU ID DA EFS*:/ /mnt/efs #Monta o EFS no diretório;
-
-while ! mountpoint -q /mnt/efs; do
-  sleep 2
-done                                                         #Esse While garante que o EFS seja montado antes de continuar;
-
-mkdir -p /mnt/efs/wordpress                                  #Cria o diretório para o Wordpress;
-chown -R ec2-user:ec2-user /mnt/efs                          #Dá permição ao ec2-user para usar os arquivos EFS;
-
-#A partir daqui, o comando cria o compose;
-sudo -u ec2-user bash -c 'cat > /home/ec2-user/docker-compose.yaml <<EOF
-version: "3.8"
-services:
-  wordpress:
-    image: wordpress
-    restart: always
-    ports:
-      - "80:80"
-    environment:
-      WORDPRESS_DB_HOST:*MEU ENDPOINT*
-      WORDPRESS_DB_USER: admin
-      WORDPRESS_DB_PASSWORD: *MINHA SENHA*
-      WORDPRESS_DB_NAME: Projeto
-    volumes:
-      - /mnt/efs/wordpress:/var/www/html
-EOF'
-
-#Abaixo, apenas executa o compose;
-sudo -u ec2-user bash -c "cd /home/ec2-user && docker compose up -d"
-```
-
+### Também adicionei no modelo meu user data (Para visualizar, [clique aqui!](https://github.com/JorgeAntero/Compass-Uol-Desafio-3-AWS/blob/main/User.data)):
 
 ### Só após isso criei o Auto Scaling em si: 
 
 ![Print Trinta e oito](/Prints/6.4.png)  
 
->- Escolhi o template do modelo de execução;  
+>- Escolhi o template do meu modelo de execução;  
 
 ![Print Trinta e nove](/Prints/6.5.png)  
 
@@ -292,7 +241,7 @@ sudo -u ec2-user bash -c "cd /home/ec2-user && docker compose up -d"
 
 ![Print Quarenta e sete](/Prints/8.1.png)  
 
->- O código de acesso que estava sendo aceitado era apenas o 200, pra resolver, troquei para `200,302`, pois 302 era o que estava dando erro;  
+>- O código de acesso que estava sendo aceitado era apenas o código 200, pra resolver, alterei para `200,302`, pois 302 era o que estava causando esse alerta;  
 
 ![Print Quarenta e oito](/Prints/8.2.png)  
 
