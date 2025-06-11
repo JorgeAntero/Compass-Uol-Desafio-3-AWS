@@ -20,9 +20,9 @@ Para o terceiro projeto, nos foi instruído a executar, seguindo a topologia pro
 
 ![Primeiro print](/Prints/1.1.png)  
 
-        Criei manualmente, para melhor aprendizado e evitar erros simples;  
-        No CIDR IPv4, coloquei o range de `/16`;
-        De resto, mantive a configuração padrão;  
+Criei manualmente, para melhor aprendizado e evitar erros simples;  
+No CIDR IPv4, coloquei o range de `/16`;
+De resto, mantive a configuração padrão;  
 
 ### E então criei e configurei as sub-redes da minha VPC:  
 
