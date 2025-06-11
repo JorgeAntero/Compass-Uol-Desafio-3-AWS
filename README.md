@@ -98,6 +98,7 @@ Para o terceiro projeto, nos foi instruído a executar, seguindo a topologia pro
 >- Por último, a entrada do tipo `HTTP`para qualquer IP;  
 >- Saída padrão novamente;  
 
+---
 ## 📨 3 - RDS configurado >  
 ### Então, segui para configurar o Banco de Dados  
 ### Primeiramente, configurei o grupo de segurança dele:
@@ -134,6 +135,7 @@ Para o terceiro projeto, nos foi instruído a executar, seguindo a topologia pro
 
 >- A única configuração adicionais feita foi nomear o banco de dados inicial como `Projeto`, para facilitar a integração futura no User_Data;  
 
+---
 ## 🗃️ 4 - Criando EFS >  
 ### Criar a EFS foi o próximo passo:  
 
@@ -147,42 +149,44 @@ Para o terceiro projeto, nos foi instruído a executar, seguindo a topologia pro
 >- Em acesso à rede, associei a minha VPC;  
 >- Por último, em Destinos de montagem, apontei as minhas duas AZ's, nas sub-redes privadas e as duas com o grupo de segurança que criei para a EFS;
 
+---
 ## 👥 5 - Configuração do Load Balancer >  
 ### Para o penúltimo passo, criei o Load Balancer:  
 
-![Print Trinta e um ](/Prints/5.1.png)  
+![Print Trinta e um](/Prints/5.1.png)  
 
 >- Configurei no esquema voltado para a internet, e com o tipo IPv4;  
 
-![Print Trinta e um ](/Prints/5.2.png)  
+![Print Trinta e dois](/Prints/5.2.png)  
 
 >- No mapeamento de rede, associei minha VPC e minhas sub-redes privadas das duas AZ'S;  
 
-![Print Trinta e um ](/Prints/5.3.png)  
+![Print Trinta e três](/Prints/5.3.png)  
 
 >- Então, precisei criar um grupo de destino. Selecionei o tipo como Instâncias, e de resto mantive o padrão;  
 
-![Print Trinta e um ](/Prints/5.4.png)  
+![Print Trinta e quatro](/Prints/5.4.png)  
 
 >- Selecionei o grupo de segurança do LB criado mais cedo;  
 >- E por último, em Listeners e roteamento, mantive o padrão e associei o meu Grupo de Destino;  
 
+---
 ## 🤖 7 - Criando o Auto Scaling >  
 ### O último passo necessitou de diversas etapas, a primeira sendo configurar um modelo de execução para as instâncias:  
 
-![Print Trinta e um ](/Prints/6.1.png)   
-![Print Trinta e um ](/Prints/6.2.png)  
+![Print Trinta e cinco](/Prints/6.1.png)   
+![Print Trinta e seis](/Prints/6.2.png)  
 
 >- Dei a ele um nome, e escolhi Amazon Linux como sua imagem;  
 
-![Print Trinta e um ](/Prints/6.3.png)  
+![Print Trinta e sete](/Prints/6.3.png)  
 
 >- O tipo escolhido foi `t2.micro`, por ser gratuito;  
 >- Não associei um par de chaves;  
 >- Não associei também sub-redes no modelo, e escolhi o grupo de segurança da EC2;  
 >- **OBS: Na imagem não aparece, mas também associei o grupo de segurança do RDS para evitar erros**   
 
-### Também adicionei no modelo meu user data:
+### Também adicionei no modelo meu user data (Para uma melhor visualização, clique aqui):
 
 ```
 #!/bin/bash
@@ -237,27 +241,63 @@ sudo -u ec2-user bash -c "cd /home/ec2-user && docker compose up -d"
 
 ### Só após isso criei o Auto Scaling em si: 
 
-![Print Trinta e um ](/Prints/6.4.png)  
+![Print Trinta e oito](/Prints/6.4.png)  
 
 >- Escolhi o template do modelo de execução;  
 
-![Print Trinta e um ](/Prints/6.5.png)  
+![Print Trinta e nove](/Prints/6.5.png)  
 
 >- Associei minha VPC, com as duas sub-redes privadas;  
 
-![Print Trinta e um ](/Prints/6.6.png)  
+![Print Quarenta](/Prints/6.6.png)  
 
 >- Anexei o balanceador de carga que criei anteriormente;  
 
-![Print Trinta e um ](/Prints/6.7.png)  
+![Print Quarenta e um](/Prints/6.7.png)  
 
 >- Não habilitei a mudança de zonas, e ativei a verificação de integridade do LB;  
 
-![Print Trinta e um ](/Prints/6.8.png)  
+![Print Quarenta e dois](/Prints/6.8.png)  
 
 >- Escolhi a capacidade desejada, assim como a mínima desejada como 2, e a máxima como 4;  
 >- Nao escolhi nenhuma política de escalabilidade;    
 
-![Print Trinta e um ](/Prints/6.9.png)  
+![Print Quarenta e três](/Prints/6.9.png)  
 
 >- Nessa etapa deixei tudo padrão;  
+
+---
+## 🆙 8 - Funcionamento >  
+### Hora de testar! Após a criação:
+
+![Print Quarenta e quatro](/Prints/7.1.png)  
+
+>- Foi criada com sucesso;  
+
+![Print Quarenta e cinco](/Prints/7.2.png)  
+
+>- As instâncias também foram levantadas com sucesso;  
+
+![Print Quarenta e seis](/Prints/7.3.png)  
+
+>- Ao utilizar o link do LB, conseguimos acessar nossa aplicação corretamente!;  
+
+![Print Quarenta e seis](/Prints/7.4.png)  
+
+>- Porém, ao analisar o grupo de auto scaling, percebi o problema acima;  
+
+---
+## 💊 8 - Ajuste final >  
+### Então, para corrigir o último erro:
+
+![Print Quarenta e sete](/Prints/8.1.png)  
+
+>- O código de acesso que estava sendo aceitado era apenas o 200, pra resolver, troquei para `200,302`, pois 302 era o que estava dando erro;  
+
+![Print Quarenta e oito](/Prints/8.2.png)  
+
+>- Ao checar novamente, vemos que deu tudo certo;  
+
+![Print Quarenta e nove](/Prints/8.3.png)  
+
+>- Wordpress funcionando normalmente após a correção; 
