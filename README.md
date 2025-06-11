@@ -19,10 +19,9 @@ Para o terceiro projeto, nos foi instruído a executar, seguindo a topologia pro
 ### O começo de tudo foi estabelecer nossa VPC:  
 
 ![Primeiro print](/Prints/1.1.png)  
-
-Criei manualmente, para melhor aprendizado e evitar erros simples;  
-No CIDR IPv4, coloquei o range de `/16`;
-De resto, mantive a configuração padrão;  
+>- Criei manualmente, para melhor aprendizado e evitar erros simples;  
+>- No CIDR IPv4, coloquei o range de `/16`;
+>- De resto, mantive a configuração padrão;  
 
 ### E então criei e configurei as sub-redes da minha VPC:  
 
@@ -145,10 +144,116 @@ De resto, mantive a configuração padrão;
 
 ![Print Trinta](/Prints/4.2.png)  
 
->- Em acesso à rede, associei a minha VPC;
+>- Em acesso à rede, associei a minha VPC;  
 >- Por último, em Destinos de montagem, apontei as minhas duas AZ's, nas sub-redes privadas e as duas com o grupo de segurança que criei para a EFS;
 
 ## 👥 5 - Configuração do Load Balancer >  
-### Criar a EFS foi o próximo passo:  
+### Para o penúltimo passo, criei o Load Balancer:  
 
-![Print Trinta e ](/Prints/5.1.png)  
+![Print Trinta e um ](/Prints/5.1.png)  
+
+>- Configurei no esquema voltado para a internet, e com o tipo IPv4;  
+
+![Print Trinta e um ](/Prints/5.2.png)  
+
+>- No mapeamento de rede, associei minha VPC e minhas sub-redes privadas das duas AZ'S;  
+
+![Print Trinta e um ](/Prints/5.3.png)  
+
+>- Então, precisei criar um grupo de destino. Selecionei o tipo como Instâncias, e de resto mantive o padrão;  
+
+![Print Trinta e um ](/Prints/5.4.png)  
+
+>- Selecionei o grupo de segurança do LB criado mais cedo;  
+>- E por último, em Listeners e roteamento, mantive o padrão e associei o meu Grupo de Destino;  
+
+## 🤖 7 - Criando o Auto Scaling >  
+### O último passo necessitou de diversas etapas, a primeira sendo configurar um modelo de execução para as instâncias:  
+
+![Print Trinta e um ](/Prints/6.1.png)   
+![Print Trinta e um ](/Prints/6.2.png)  
+
+>- Dei a ele um nome, e escolhi Amazon Linux como sua imagem;  
+
+![Print Trinta e um ](/Prints/6.3.png)  
+
+>- O tipo escolhido foi `t2.micro`, por ser gratuito;  
+>- Não associei um par de chaves;  
+>- Não associei também sub-redes no modelo, e escolhi o grupo de segurança da EC2;  
+>- **OBS: Na imagem não aparece, mas também associei o grupo de segurança do RDS para evitar erros**   
+
+### Também adicionei no modelo meu user data:
+
+```
+#!/bin/bash
+
+
+exec > /var/log/user-data.log 2>&1        #Toda saída vai para o arquivo de log;
+set -euxo pipefail                        #Serve para evitar erros durante a execução do script;
+
+dnf update -y
+dnf install -y docker
+systemctl enable --now docker
+usermod -aG docker ec2-user
+
+mkdir -p /usr/libexec/docker/cli-plugins
+curl -SL "https://github.com/docker/compose/releases/download/v2.23.0/docker-compose-linux-x86_64" -o /usr/libexec/docker/cli-plugins/docker-compose
+chmod +x /usr/libexec/docker/cli-plugins/docker-compose  
+
+mkdir -p /mnt/efs
+sudo mount -t nfs4 -o nfsvers=4.1 fs-0195aea43f8ae6ee8.efs.us-east-1.amazonaws.com:/ /mnt/efs
+
+while ! mountpoint -q /mnt/efs; do
+  sleep 2
+done
+
+mkdir -p /mnt/efs/wordpress
+chown -R ec2-user:ec2-user /mnt/efs
+
+sudo -u ec2-user bash -c 'cat > /home/ec2-user/docker-compose.yaml <<EOF
+version: "3.8"
+services:
+  wordpress:
+    image: wordpress
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      WORDPRESS_DB_HOST: projeto-wordpress-banco.ck9k4ccc4dtm.us-east-1.rds.amazonaws.com
+      WORDPRESS_DB_USER: admin
+      WORDPRESS_DB_PASSWORD: 02061521Jorge-
+      WORDPRESS_DB_NAME: Projeto
+    volumes:
+      - /mnt/efs/wordpress:/var/www/html
+EOF'
+
+sudo -u ec2-user bash -c "cd /home/ec2-user && docker compose up -d" 
+```
+
+
+### Só após isso criei o Auto Scaling em si: 
+
+![Print Trinta e um ](/Prints/6.4.png)  
+
+>- Escolhi o template do modelo de execução;  
+
+![Print Trinta e um ](/Prints/6.5.png)  
+
+>- Associei minha VPC, com as duas sub-redes privadas;  
+
+![Print Trinta e um ](/Prints/6.6.png)  
+
+>- Anexei o balanceador de carga que criei anteriormente;  
+
+![Print Trinta e um ](/Prints/6.7.png)  
+
+>- Não habilitei a mudança de zonas, e ativei a verificação de integridade do LB;  
+
+![Print Trinta e um ](/Prints/6.8.png)  
+
+>- Escolhi a capacidade desejada, assim como a mínima desejada como 2, e a máxima como 4;  
+>- Nao escolhi nenhuma política de escalabilidade;    
+
+![Print Trinta e um ](/Prints/6.9.png)  
+
+>- Nessa etapa deixei tudo padrão;  
